@@ -1,0 +1,18 @@
+year,date,race,distance_miles,finish_time,finish_hours,avg_pace_min_per_mile,avg_speed_mph,overall_place,field_size,percentile_finish,age_approx,source
+2005,,San Diego One Day,100,18:56:00,18.933,11:22,5.28,,,,29-30,davidgoggins.com
+2006,2006-07-24,Badwater 135,135,30:18:54,30.315,13:28,4.45,5,67,94.0,31,ultrarunning.com; davidgoggins.com
+2007,2007-06-23,Western States 100,100,20:52:50,20.881,12:32,4.79,26,270,90.7,32,ultrarunning.com
+2007,2007-07-23,Badwater 135,135,25:49:40,25.828,11:29,5.23,3,78,97.4,32,ultrarunning.com; davidgoggins.com
+2013,2013-07-15,Badwater 135,135,32:44:10,32.736,14:33,4.12,18,80,78.8,38,ultrarunning.com
+2013,2013-12-14,Hellgate 100K,62.1,12:47:28,12.791,12:22,4.85,8,110,93.6,38,ultrarunning.com
+2015,2015-12-12,Hellgate 100K,62.1,11:56:02,11.934,11:32,5.2,5,135,97.0,40,ultrarunning.com
+2016,,Strolling Jim 40,40,4:54:15,4.904,7:21,8.16,1,,,40-41,DUV statistics; runbryanrun.com
+2016,,Zane Grey 50,50,11:23:29,11.391,13:40,4.39,13,,,40-41,DUV statistics; runbryanrun.com
+2016,,Music City Trail 50K,31.1,4:30:43,4.512,8:42,6.89,1,,,40-41,DUV statistics; runbryanrun.com
+2016,,Infinitus 88K,54.7,12:01:00,12.017,13:11,4.55,1,,,40-41,DUV statistics; runbryanrun.com
+2016,2016-11-19,JFK 50,50,7:30:36,7.51,9:01,6.66,34,753,95.6,41,ultrarunning.com; DUV statistics
+2019,2019-08-17,Leadville Trail 100,100,22:55:44,22.929,13:45,4.36,35,377,91.0,44,ultrarunning.com; DUV statistics (22:55:49)
+2020,2020-10-09,Moab 240,238,62:21:29,62.358,15:43,3.82,2,127,99.2,45,ultrarunning.com; DUV statistics
+2020,2020-11-21,JFK 50,50,7:08:26,7.141,8:34,7.0,25,636,96.2,45,ultrarunning.com; DUV statistics
+2025,2025-08-08,Bigfoot 200,206,66:04:18,66.072,19:15,3.12,23,,,50,DUV statistics; multidayrunning.com
+2025,2025-10-10,Moab 240,238,84:57:23,84.956,21:25,2.8,21,150,86.7,50,ultrarunning.com (DUV: 84:57:24)
