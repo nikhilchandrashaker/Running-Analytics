@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Goggins Leg Biomechanics</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--text:#161616;--muted:#6b6b6b;--accent:#d62828;--line:#e3e1dc;--ok:#1f8a4c;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0e0e0e;--card:#1a1a1a;--text:#f2f2f2;--muted:#9a9a9a;--accent:#ff4d4d;--line:#2d2d2d;--ok:#4cc07a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e0e0e;--card:#1a1a1a;--text:#f2f2f2;--muted:#9a9a9a;--accent:#ff4d4d;--line:#2d2d2d;--ok:#4cc07a;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.7rem;margin:0;text-transform:uppercase}h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin:4px 0 16px}
+h2{font-size:.8rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:12px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.kpi b{display:block;font-size:1.5rem}.kpi small{color:var(--muted)}
+.ctl{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+label{font-size:.75rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
+input[type=range]{width:150px}
+button{background:transparent;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer}
+button:hover{border-color:var(--accent)}
+svg{width:100%;height:auto;display:block}svg text{fill:var(--muted);font-size:10px}
+.note{color:var(--muted);font-size:.8rem}
+.row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.row:last-child{border:0}.row span:first-child{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Goggins <span>Leg Biomechanics</span></h1>
+  <p class="sub">A spring-mass model of his legs at the real pace of each race. No one has published lab data on him, so this is a physics model with stated assumptions, not a measurement.</p>
+
+  <div class="card">
+    <div class="ctl">
+      <label>Race<select id="race"></select></label>
+      <label>Body mass <span id="mv"></span><input type="range" id="mass" min="70" max="140" step="1" value="91"></label>
+      <label>Height <span id="hv"></span><input type="range" id="ht" min="1.75" max="1.95" step="0.01" value="1.85"></label>
+      <label>Cadence <span id="cv"></span><input type="range" id="cad" min="140" max="185" step="1" value="160"></label>
+      <button id="p91">91 kg (current est.)</button>
+      <button id="p135">135 kg (297 lb, pre-SEAL)</button>
+    </div>
+  </div>
+
+  <div class="grid" id="kpis"></div>
+
+  <div class="two">
+    <div class="card"><h2>Leg as a spring (slow motion)</h2><svg id="sv" viewBox="0 0 300 250" role="img" aria-label="Animated spring-mass leg model"></svg><p class="note" id="phase"></p></div>
+    <div class="card"><h2>Per-step mechanics</h2><div id="det"></div></div>
+  </div>
+
+  <div class="card"><h2>Footstrikes per leg, by race</h2><div id="chart"></div></div>
+
+  <div class="card"><h2>Reported leg injury history (not medical data)</h2>
+    <div class="row"><span>Hell Week, first attempt</span><span>Stress fractures and pneumonia (Navy interview)</span></div>
+    <div class="row"><span>Shins</span><span>Stress fractures, taped feet and ankles and kept going (Mr Porter)</span></div>
+    <div class="row"><span>Second Hell Week</span><span>Ended by a fractured kneecap (Military.com)</span></div>
+    <div class="row"><span>Body mass</span><span>Reported 297 lb before joining the SEALs, about 200 lb now (Wikipedia)</span></div>
+    <p class="note" style="margin-top:8px">These are press and biography accounts. I didn’t find imaging, gait-lab or injury-by-leg data, so nothing here claims which leg or bone was affected.</p></div>
+
+  <div class="card"><h2>Model and assumptions</h2><p class="note">Sine-wave spring-mass model after Morin et al. (2005). Peak vertical force F = m·g·(π/2)·(flight time ÷ contact time + 1). Contact time falls with speed (my assumed fit: 0.40 − 0.035·v seconds, never longer than a step). Step time = 60 ÷ cadence. Leg length = 0.53 × height. Leg stiffness = F ÷ leg compression, vertical stiffness = F ÷ centre-of-mass drop. Speed is moving speed: his race time minus assumed stoppages (70% moving at 200+ miles, 92% at 100 to 135 miles, 97% at 50 to 100, 100% under 50). Height and weight are public estimates (6 ft 1 in and 200 lb on Wikipedia; other sites say 6 ft 2 in and 190 lb). Fatigue, downhill braking, terrain and shoes are not modelled, so real forces would differ, especially on mountain courses.</p></div>
+</div>
+<script>
+const RACES=[
+["San Diego One Day",2005,100,"18:56:00"],["Badwater 135",2006,135,"30:18:54"],["Western States 100",2007,100,"20:52:50"],["Badwater 135",2007,135,"25:49:40"],["Badwater 135",2013,135,"32:44:10"],["Hellgate 100K",2013,62.1,"12:47:28"],["Hellgate 100K",2015,62.1,"11:56:02"],["Strolling Jim 40",2016,40,"4:54:15"],["Zane Grey 50",2016,50,"11:23:29"],["Music City Trail 50K",2016,31.1,"4:30:43"],["Infinitus 88K",2016,54.7,"12:01:00"],["JFK 50",2016,50,"7:30:36"],["Leadville Trail 100",2019,100,"22:55:44"],["Moab 240",2020,238,"62:21:29"],["JFK 50",2020,50,"7:08:26"],["Bigfoot 200",2025,206,"66:04:18"],["Moab 240",2025,238,"84:57:23"]
+].map(a=>{const[h,m,s]=a[3].split(":").map(Number);return{n:a[0],y:a[1],mi:a[2],t:a[3],hrs:h+m/60+s/3600}});
+const $=id=>document.getElementById(id),G=9.81;
+const mf=mi=>mi>=200?.7:mi>=100?.92:mi>=50?.97:1;
+function model(r,m,H,cad){
+  const mv=r.hrs*mf(r.mi),v=r.mi*1609.344/(mv*3600),ts=60/cad,tc=Math.min(ts,Math.max(.18,.40-.035*v)),tf=Math.max(0,ts-tc);
+  const F=m*G*(Math.PI/2)*(tf/tc+1),dy=(F/(m*Math.PI**2)-G/8)*tc*tc,L0=.53*H;
+  const dL=L0-Math.sqrt(Math.max(0,L0*L0-(v*tc/2)**2))+dy;
+  return{v,mph:v*2.23694,ts,tc,tf,F,bw:F/(m*G),dy,L0,dL,kl:F/dL/1000,kv:F/dy/1000,steps:mv*3600*cad/60,sl:v*ts,mv};
+}
+let M,cur,t0=performance.now();
+$("race").innerHTML=RACES.map((r,i)=>`<option value="${i}">${r.n} ${r.y}</option>`).join("");
+$("race").value=16;
+const f1=(x,d=2)=>x.toFixed(d);
+function update(){
+  const r=RACES[+$("race").value],m=+$("mass").value,H=+$("ht").value,c=+$("cad").value;
+  $("mv").textContent=`(${m} kg / ${Math.round(m*2.2046)} lb)`;$("hv").textContent=`(${H.toFixed(2)} m)`;$("cv").textContent=`(${c}/min)`;
+  cur=model(r,m,H,c);M=cur;
+  $("kpis").innerHTML=[[f1(cur.mph,1)+" mph","moving speed"],[f1(cur.bw,2)+" × BW","peak vertical force"],[Math.round(cur.F)+" N","per footstrike"],[f1(cur.kl,1)+" kN/m","leg stiffness"],[Math.round(cur.steps/2).toLocaleString(),"footstrikes per leg"]].map(k=>`<div class="card kpi" style="margin:0"><b>${k[0]}</b><small>${k[1]}</small></div>`).join("");
+  $("det").innerHTML=[["Step length",f1(cur.sl)+" m"],["Contact time",Math.round(cur.tc*1000)+" ms"],["Flight time",Math.round(cur.tf*1000)+" ms"],["Leg length",f1(cur.L0)+" m"],["Leg compression",Math.round(cur.dL*100)+" cm"],["Body drop in contact",Math.round(cur.dy*100)+" cm"],["Vertical stiffness",f1(cur.kv,1)+" kN/m"],["Time moving (assumed)",f1(cur.mv,1)+" h of "+f1(r.hrs,1)+" h"],["Steps vs. a 4 h marathon",f1(cur.steps/(4*60*c),1)+"×"]].map(x=>`<div class="row"><span>${x[0]}</span><span>${x[1]}</span></div>`).join("");
+  // chart
+  const W=520,Hh=200,all=RACES.map(x=>model(x,m,H,c).steps/2),mx=Math.max(...all);
+  let s=`<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Footstrikes per leg by race">`;
+  all.forEach((v,i)=>{const bw=W/all.length-5,x=6+i*(W/all.length),h=v/mx*(Hh-60),sel=i===+$("race").value;
+   s+=`<rect x="${x}" y="${Hh-40-h}" width="${bw}" height="${h}" rx="2" fill="${sel?"var(--accent)":"var(--muted)"}" opacity="${sel?1:.55}"><title>${RACES[i].n} ${RACES[i].y}: ${Math.round(v).toLocaleString()}</title></rect><text x="${x+bw/2}" y="${Hh-28}" text-anchor="middle">${String(RACES[i].y).slice(2)}</text>`;
+   if(sel||i===13||i===16)s+=`<text x="${x+bw/2}" y="${Hh-44-h}" text-anchor="middle">${Math.round(v/1000)}k</text>`});
+  $("chart").innerHTML=s+`<text x="2" y="${Hh-8}">bars in race order; red = selected; labels are thousands per leg</text></svg>`;
+}
+function draw(now){
+  if(!cur){requestAnimationFrame(draw);return}
+  const slow=8,T=cur.ts*slow,ph=(((now-t0)/1000)%T)/T,sc=170,gy=225,Ls=cur.L0*sc,cx=150;
+  const cf=cur.tc/cur.ts;let hipY,footY,mode;
+  if(ph<cf){const u=ph/cf,comp=cur.dL*Math.sin(Math.PI*u)*sc;hipY=gy-Ls+comp;footY=gy;mode="Contact: leg compresses and stores energy"}
+  else{const u=(ph-cf)/(1-cf),h=G*cur.tf*cur.tf/8*sc;hipY=gy-Ls-4*h*u*(1-u)-0;footY=hipY+Ls;mode="Flight: both feet off the ground";}
+  const n=8,pts=[[cx,hipY]];for(let i=1;i<n;i++)pts.push([cx+(i%2?11:-11),hipY+(footY-hipY)*i/n]);pts.push([cx,footY]);
+  $("sv").innerHTML=`<line x1="20" x2="280" y1="${gy+2}" y2="${gy+2}" stroke="var(--line)" stroke-width="3"/><polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round"/><circle cx="${cx}" cy="${hipY-14}" r="16" fill="var(--text)"/><text x="10" y="16">${Math.round(cur.tc*1000)} ms contact / ${Math.round(cur.tf*1000)} ms flight (shown ${slow}× slower)</text>`;
+  $("phase").textContent=mode;
+  requestAnimationFrame(draw);
+}
+["race","mass","ht","cad"].forEach(id=>$(id).oninput=update);
+$("p91").onclick=()=>{$("mass").value=91;update()};$("p135").onclick=()=>{$("mass").value=135;update()};
+update();requestAnimationFrame(draw);
+</script>
+</body>
+</html>

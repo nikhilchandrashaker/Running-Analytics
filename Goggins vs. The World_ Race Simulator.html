@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Goggins vs. The World: Race Simulator</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fff;--text:#161616;--muted:#6b6b6b;--accent:#d62828;--line:#e3e1dc;--ok:#1f8a4c;--c1:#2b6cb0;--c2:#7b3fb0;--c3:#c27a00;--c4:#8a8a8a;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0e0e0e;--card:#1a1a1a;--text:#f2f2f2;--muted:#9a9a9a;--accent:#ff4d4d;--line:#2d2d2d;--ok:#4cc07a;--c1:#63a4ff;--c2:#b98cff;--c3:#ffb347;--c4:#a0a0a0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e0e0e;--card:#1a1a1a;--text:#f2f2f2;--muted:#9a9a9a;--accent:#ff4d4d;--line:#2d2d2d;--ok:#4cc07a;--c1:#63a4ff;--c2:#b98cff;--c3:#ffb347;--c4:#a0a0a0;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.7rem;margin:0;text-transform:uppercase}h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin:4px 0 16px}
+h2{font-size:.8rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.ctl{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+label{font-size:.75rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+select,input[type=text]{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
+input[type=text]{width:90px}input[type=range]{width:150px}
+button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer}
+.lane{display:grid;grid-template-columns:130px 1fr 110px;gap:8px;align-items:center;margin:10px 0}
+.lane b{font-size:.85rem}.lane small{color:var(--muted);display:block;font-weight:400}
+.track{position:relative;height:16px;background:var(--line);border-radius:8px;overflow:hidden}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:8px;width:0}
+.st{font-size:.8rem;text-align:right;font-variant-numeric:tabular-nums}
+.clock{font-size:1.4rem;font-weight:700;margin-bottom:6px;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600}
+td.win{color:var(--accent);font-weight:700}
+.note{color:var(--muted);font-size:.8rem}
+@media (max-width:560px){.lane{grid-template-columns:90px 1fr 80px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Goggins <span>vs. the World</span></h1>
+  <p class="sub">Goggins’ times are his real results. The other four runners are a model: how they might run the same course.</p>
+
+  <div class="card">
+    <div class="ctl">
+      <label>Race<select id="race"></select></label>
+      <label>Terrain difficulty <span id="fv"></span><input type="range" id="f" min="1" max="1.8" step="0.05"></label>
+      <label>Fatigue past a marathon <span id="kv"></span><input type="range" id="k" min="1.1" max="1.35" step="0.01" value="1.25"></label>
+      <label>Rest/sleep rate <span id="sv"></span><input type="range" id="s" min="0" max="0.5" step="0.05" value="0.25"></label>
+    </div>
+    <div class="ctl" style="margin-top:12px" id="mar"></div>
+  </div>
+
+  <div class="card">
+    <div class="clock" id="clock">0:00:00</div>
+    <div id="lanes"></div>
+    <div class="ctl" style="margin-top:12px">
+      <button id="play">Play</button>
+      <label style="flex:1;min-width:180px">Scrub<input type="range" id="scrub" min="0" max="1000" value="0" style="width:100%"></label>
+    </div>
+  </div>
+
+  <div class="card scroll"><h2 id="rt">Result</h2><table><thead><tr><th>Runner</th><th>Finish</th><th>Avg pace</th><th>Avg mph</th><th>vs. Goggins</th></tr></thead><tbody id="res"></tbody></table></div>
+
+  <div class="card scroll"><h2>Every Goggins race, simulated (finish times)</h2><table><thead id="mh"></thead><tbody id="mb"></tbody></table>
+  <p class="note">Red = simulated runner beats Goggins’ real time. Times at or above 48 h are shown in days.</p></div>
+
+  <div class="card"><h2>How the model works</h2>
+  <p class="note">Each runner is defined by a flat marathon time (editable above). Finish time follows a Riegel-style curve: time ∝ distance<sup>1.06</sup> up to 26.2 miles, then distance<sup>k</sup> beyond it (k is the fatigue slider; elite 100-mile marks sit near 1.25). The result is multiplied by a terrain factor (my rough guess per course: heat, climbing, altitude, night, trails), then rest time is added once moving time passes 20 hours. Goggins’ lane uses his actual finish time, with the same fatigue curve shaping his pacing. Kipchoge has never raced an ultra, so his lane is an extrapolation, not a prediction. The “normal person” lane assumes a walk/jog finish; most untrained people would not complete these distances or would miss official cutoffs. Marathon times are assumptions: Kipchoge 2:01:09 (his Berlin 2022 mark), pro 2:10, healthy 4:30, normal 6:30. Goggins results come from ultrarunning.com, DUV statistics and his official site; DNFs are excluded. Sim output is for fun, not a scientific forecast.</p></div>
+</div>
+<script>
+// name, year, miles, actual time, place, terrain factor, terrain label
+const RACES=[
+["San Diego One Day",2005,100,"18:56:00",1.0,"loop course"],
+["Badwater 135",2006,135,"30:18:54",1.2,"desert heat, road"],
+["Western States 100",2007,100,"20:52:50",1.35,"mountain trail"],
+["Badwater 135",2007,135,"25:49:40",1.2,"desert heat, road"],
+["Badwater 135",2013,135,"32:44:10",1.2,"desert heat, road"],
+["Hellgate 100K",2013,62.1,"12:47:28",1.3,"winter night trail"],
+["Hellgate 100K",2015,62.1,"11:56:02",1.3,"winter night trail"],
+["Strolling Jim 40",2016,40,"4:54:15",1.0,"road"],
+["Zane Grey 50",2016,50,"11:23:29",1.5,"rugged mountain"],
+["Music City Trail 50K",2016,31.1,"4:30:43",1.15,"trail"],
+["Infinitus 88K",2016,54.7,"12:01:00",1.3,"mountain trail"],
+["JFK 50",2016,50,"7:30:36",1.15,"trail and towpath"],
+["Leadville Trail 100",2019,100,"22:55:44",1.4,"altitude trail"],
+["Moab 240",2020,238,"62:21:29",1.5,"desert trail"],
+["JFK 50",2020,50,"7:08:26",1.15,"trail and towpath"],
+["Bigfoot 200",2025,206,"66:04:18",1.5,"mountain trail"],
+["Moab 240",2025,238,"84:57:23",1.5,"desert trail"]
+].map(a=>({n:a[0],y:a[1],mi:a[2],t:a[3],hrs:p(a[3]),f:a[4],tl:a[5]}));
+function p(s){const a=s.split(":").map(Number);return a[0]+(a[1]||0)/60+(a[2]||0)/3600}
+const P=[
+{id:"k",name:"Eliud Kipchoge",sub:"2:01:09 marathon",m:"2:01:09",c:"var(--c1)"},
+{id:"p",name:"Pro runner",sub:"2:10 marathon",m:"2:10:00",c:"var(--c2)"},
+{id:"h",name:"Decently healthy",sub:"4:30 marathon",m:"4:30:00",c:"var(--c3)"},
+{id:"n",name:"Normal person",sub:"6:30 walk/jog",m:"6:30:00",c:"var(--c4)"}
+];
+const $=id=>document.getElementById(id);
+let K=1.25,SL=.25,F=1.2,race=RACES[0],playing=false,T=0,maxT=1;
+const unit=(d)=>Math.pow(d/26.2,d<=26.2?1.06:K);
+const mov=(M,f,d)=>M*f*unit(d);
+const elapsed=(M,f,d)=>{const m=mov(M,f,d);return m+Math.max(0,m-20)*SL};
+const gEl=(r,d)=>r.hrs*unit(d)/unit(r.mi);
+function fin(i,r,f){return elapsed(p(P[i].m),f,r.mi)}
+function pos(fn,D,t){if(t>=fn(D))return D;let lo=0,hi=D;for(let i=0;i<40;i++){const mid=(lo+hi)/2;fn(mid)<t?lo=mid:hi=mid}return lo}
+const fT=h=>{const s=Math.round(h*3600),H=Math.floor(s/3600),M=Math.floor(s%3600/60),S=s%60;return H+":"+String(M).padStart(2,"0")+":"+String(S).padStart(2,"0")};
+const fL=h=>h>=48?(h/24).toFixed(1)+" d":fT(h);
+const fp=pc=>{const m=Math.floor(pc),s=Math.round((pc-m)*60);return m+":"+String(s===60?0:s).padStart(2,"0")};
+
+$("race").innerHTML=RACES.map((r,i)=>`<option value="${i}">${r.n} ${r.y} (${r.mi} mi)</option>`).join("");
+$("mar").innerHTML=P.map(x=>`<label>${x.name} marathon<input type="text" id="m_${x.id}" value="${x.m}"></label>`).join("");
+$("lanes").innerHTML=[{name:"David Goggins",sub:"actual result",c:"var(--accent)"},...P].map((x,i)=>`<div class="lane"><b>${x.name}<small>${x.sub}</small></b><div class="track"><div class="fill" id="b${i}" style="background:${x.c}"></div></div><div class="st" id="s${i}"></div></div>`).join("");
+
+function maxFinish(){return Math.max(race.hrs,...P.map((_,i)=>fin(i,race,F)))}
+function setup(){
+  race=RACES[+$("race").value||0];
+  F=+$("f").value;K=+$("k").value;SL=+$("s").value;
+  $("fv").textContent=`(${F.toFixed(2)}×)`;$("kv").textContent=`(${K.toFixed(2)})`;$("sv").textContent=`(${Math.round(SL*100)}%)`;
+  P.forEach(x=>{const v=$("m_"+x.id).value;if(/^\d+:\d\d(:\d\d)?$/.test(v))x.m=v});
+  maxT=maxFinish();drawAll();tables();
+}
+function drawAll(){
+  const D=race.mi;$("clock").textContent=fT(T)+"  ·  "+race.n+" "+race.y;
+  const fns=[d=>gEl(race,d),...P.map(x=>d=>elapsed(p(x.m),F,d))];
+  fns.forEach((fn,i)=>{const d=pos(fn,D,T);$("b"+i).style.width=(d/D*100)+"%";
+   $("s"+i).textContent=d>=D?"Finished "+fL(fn(D)):d.toFixed(1)+" / "+D+" mi"});
+  $("scrub").value=T/maxT*1000;
+}
+function tables(){
+  const D=race.mi;$("rt").textContent=`${race.n} ${race.y} · ${D} mi · ${race.tl}`;
+  const rows=[{n:"David Goggins (actual)",h:race.hrs},...P.map((x,i)=>({n:x.name,h:fin(i,race,F)}))];
+  $("res").innerHTML=rows.map((r,i)=>`<tr><td>${r.n}</td><td>${fL(r.h)}</td><td>${fp(r.h*60/D)}/mi</td><td>${(D/r.h).toFixed(1)}</td><td class="${i&&r.h<race.hrs?"win":""}">${i?(r.h<race.hrs?(race.hrs/r.h).toFixed(2)+"× faster":(r.h/race.hrs).toFixed(2)+"× slower"):"–"}</td></tr>`).join("");
+  $("mh").innerHTML=`<tr><th>Race</th><th>Goggins</th>${P.map(x=>`<th>${x.name}</th>`).join("")}</tr>`;
+  $("mb").innerHTML=RACES.map(r=>`<tr><td>${r.n} ${r.y}</td><td><b>${fL(r.hrs)}</b></td>${P.map((x,i)=>{const h=fin(i,r,r===race?F:r.f);return `<td class="${h<r.hrs?"win":""}">${fL(h)}</td>`}).join("")}</tr>`).join("");
+}
+function loop(prev){return ts=>{if(!playing)return;const dt=(ts-prev)/1000;T=Math.min(maxT,T+dt*maxT/25);drawAll();if(T>=maxT){playing=false;$("play").textContent="Replay";return}requestAnimationFrame(loop(ts))}}
+$("play").onclick=()=>{if(playing){playing=false;$("play").textContent="Play";return}if(T>=maxT)T=0;playing=true;$("play").textContent="Pause";requestAnimationFrame(ts=>requestAnimationFrame(loop(ts)))};
+$("scrub").oninput=e=>{T=e.target.value/1000*maxT;drawAll()};
+$("race").onchange=()=>{T=0;$("f").value=RACES[+$("race").value].f;setup()};
+["f","k","s"].forEach(id=>$(id).oninput=()=>{setup()});
+document.querySelectorAll("#mar input").forEach(e=>e.onchange=setup);
+$("f").value=RACES[0].f;setup();
+</script>
+</body>
+</html>
